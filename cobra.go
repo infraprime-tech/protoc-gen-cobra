@@ -114,7 +114,7 @@ func _{{.Parent.GoName}}{{.GoName}}Command(cfg *client.Config) *cobra.Command {
 				cli := New{{.Parent.GoName}}Client(cc)
 				v := &{{.Input.GoIdent.GoName}}{}
 
-				md := metadata.New(cfg.headers)
+				md := metadata.New(cfg.Headers)
 				ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 				defer cancel()
 				ctx = metadata.NewOutgoingContext(ctx, md)
