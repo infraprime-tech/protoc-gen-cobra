@@ -13,7 +13,7 @@ import (
 	"github.com/golang/protobuf/ptypes/wrappers"
 	"github.com/mitchellh/mapstructure"
 
-	"github.com/NathanBaulch/protoc-gen-cobra/ptypes"
+	"github.com/infraprime-tech/protoc-gen-cobra/ptypes"
 )
 
 var NoOp = func(interface{}) error { return nil }

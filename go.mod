@@ -3,7 +3,6 @@ module github.com/infraprime-tech/protoc-gen-cobra
 go 1.13
 
 require (
-	github.com/NathanBaulch/protoc-gen-cobra v0.5.0
 	github.com/golang/protobuf v1.4.3
 	github.com/iancoleman/strcase v0.1.3
 	github.com/mitchellh/go-homedir v1.1.0

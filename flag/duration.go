@@ -6,7 +6,7 @@ import (
 	"github.com/golang/protobuf/ptypes/duration"
 	"github.com/spf13/pflag"
 
-	"github.com/NathanBaulch/protoc-gen-cobra/ptypes"
+	"github.com/infraprime-tech/protoc-gen-cobra/ptypes"
 )
 
 func DurationVar(fs *pflag.FlagSet, p **duration.Duration, name, usage string) {

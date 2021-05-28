@@ -3,10 +3,10 @@
 package pb
 
 import (
-	client "github.com/NathanBaulch/protoc-gen-cobra/client"
-	flag "github.com/NathanBaulch/protoc-gen-cobra/flag"
-	iocodec "github.com/NathanBaulch/protoc-gen-cobra/iocodec"
 	proto "github.com/golang/protobuf/proto"
+	client "github.com/infraprime-tech/protoc-gen-cobra/client"
+	flag "github.com/infraprime-tech/protoc-gen-cobra/flag"
+	iocodec "github.com/infraprime-tech/protoc-gen-cobra/iocodec"
 	cobra "github.com/spf13/cobra"
 	grpc "google.golang.org/grpc"
 	io "io"

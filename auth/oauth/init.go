@@ -8,8 +8,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/oauth"
 
-	"github.com/NathanBaulch/protoc-gen-cobra/client"
-	"github.com/NathanBaulch/protoc-gen-cobra/naming"
+	"github.com/infraprime-tech/protoc-gen-cobra/client"
+	"github.com/infraprime-tech/protoc-gen-cobra/naming"
 )
 
 var Config = &config{
