@@ -2,8 +2,8 @@ name: CLI Build
 
 on:
   push:
-    branches:
-      - master
+    tags:
+      - 'v*.*.*'
 
 
 permissions:
