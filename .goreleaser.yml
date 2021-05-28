@@ -60,7 +60,7 @@ changelog:
 ## We upload the artifacts to S3, and not on the git repos
 release:
   github:
-    owner: iplt-git-bot
+    owner: protoc-gen-cobra
     name: protoc-gen-cobra
   ids:
     - protoc-gen-cobra-archive
