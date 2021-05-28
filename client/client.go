@@ -17,8 +17,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
-	"github.com/NathanBaulch/protoc-gen-cobra/iocodec"
-	"github.com/NathanBaulch/protoc-gen-cobra/naming"
+	"github.com/infraprime-tech/protoc-gen-cobra/iocodec"
+	"github.com/infraprime-tech/protoc-gen-cobra/naming"
 )
 
 type (
@@ -45,6 +45,7 @@ type Config struct {
 	CACertFile         string
 	CertFile           string
 	KeyFile            string
+	headers            map[string]string
 
 	flagBinders []FlagBinder
 	preDialers  []PreDialer

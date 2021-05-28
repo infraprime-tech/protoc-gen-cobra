@@ -46,7 +46,7 @@ func TestGolden(t *testing.T) {
 	// Compile each package, using this binary as protoc-gen-cobra.
 	for dir, sources := range packages {
 		dir := filepath.Join(workdir, dir)
-		if err := os.MkdirAll(dir, 0666); err != nil {
+		if err := os.MkdirAll(dir, 0777); err != nil {
 			t.Fatal(err)
 		}
 		args := []string{"-Itestdata", "--cobra_out=" + dir}
