@@ -3,12 +3,15 @@
 package pb
 
 import (
-	client "github.com/NathanBaulch/protoc-gen-cobra/client"
-	flag "github.com/NathanBaulch/protoc-gen-cobra/flag"
-	iocodec "github.com/NathanBaulch/protoc-gen-cobra/iocodec"
+	context "context"
 	proto "github.com/golang/protobuf/proto"
+	client "github.com/infraprime-tech/protoc-gen-cobra/client"
+	flag "github.com/infraprime-tech/protoc-gen-cobra/flag"
+	iocodec "github.com/infraprime-tech/protoc-gen-cobra/iocodec"
 	cobra "github.com/spf13/cobra"
 	grpc "google.golang.org/grpc"
+	metadata "google.golang.org/grpc/metadata"
+	time "time"
 )
 
 func BankClientCommand(options ...client.Option) *cobra.Command {
@@ -49,12 +52,17 @@ func _BankDepositCommand(cfg *client.Config) *cobra.Command {
 				cli := NewBankClient(cc)
 				v := &DepositRequest{}
 
+				md := metadata.New(cfg.headers)
+				ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+				defer cancel()
+				ctx = metadata.NewOutgoingContext(ctx, md)
+
 				if err := in(v); err != nil {
 					return err
 				}
 				proto.Merge(v, req)
 
-				res, err := cli.Deposit(cmd.Context(), v)
+				res, err := cli.Deposit(ctx, v)
 
 				if err != nil {
 					return err

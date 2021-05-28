@@ -113,6 +113,12 @@ func _{{.Parent.GoName}}{{.GoName}}Command(cfg *client.Config) *cobra.Command {
 			return client.RoundTrip(cmd.Context(), cfg, func(cc grpc.ClientConnInterface, in iocodec.Decoder, out iocodec.Encoder) error {
 				cli := New{{.Parent.GoName}}Client(cc)
 				v := &{{.Input.GoIdent.GoName}}{}
+
+				md := metadata.New(cfg.headers)
+				ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+				defer cancel()
+				ctx = metadata.NewOutgoingContext(ctx, md)
+
 	{{if .Desc.IsStreamingClient}}
 				stm, err := cli.{{.GoName}}(cmd.Context())
 				if err != nil {
@@ -137,9 +143,9 @@ func _{{.Parent.GoName}}{{.GoName}}Command(cfg *client.Config) *cobra.Command {
 				}
 				proto.Merge(v, req)
 		{{if .Desc.IsStreamingServer}}
-				stm, err := cli.{{.GoName}}(cmd.Context(), v)
+				stm, err := cli.{{.GoName}}(ctx, v)
 		{{else}}
-				res, err := cli.{{.GoName}}(cmd.Context(), v)
+				res, err := cli.{{.GoName}}(ctx, v)
 		{{end}}
 				if err != nil {
 					return err
@@ -187,6 +193,9 @@ func _{{.Parent.GoName}}{{.GoName}}Command(cfg *client.Config) *cobra.Command {
 		"github.com/infraprime-tech/protoc-gen-cobra/iocodec",
 		"github.com/spf13/cobra",
 		"google.golang.org/grpc",
+		"context",
+		"google.golang.org/grpc/metadata",
+		"time",
 	}
 )
 
