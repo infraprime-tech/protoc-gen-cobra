@@ -52,7 +52,7 @@ func {{.GoName}}ClientCommand(options ...client.Option) *cobra.Command {
 		Funcs(template.FuncMap{"cleanComments": cleanComments}).
 		Parse(serviceTemplateCode))
 	serviceImports = []protogen.GoImportPath{
-		"github.com/NathanBaulch/protoc-gen-cobra/client",
+		"github.com/infraprime-tech/protoc-gen-cobra/client",
 		"github.com/spf13/cobra",
 	}
 )
@@ -182,9 +182,9 @@ func _{{.Parent.GoName}}{{.GoName}}Command(cfg *client.Config) *cobra.Command {
 		Parse(methodTemplateCode))
 	methodImports = []protogen.GoImportPath{
 		"github.com/golang/protobuf/proto",
-		"github.com/NathanBaulch/protoc-gen-cobra/client",
-		"github.com/NathanBaulch/protoc-gen-cobra/flag",
-		"github.com/NathanBaulch/protoc-gen-cobra/iocodec",
+		"github.com/infraprime-tech/protoc-gen-cobra/client",
+		"github.com/infraprime-tech/protoc-gen-cobra/flag",
+		"github.com/infraprime-tech/protoc-gen-cobra/iocodec",
 		"github.com/spf13/cobra",
 		"google.golang.org/grpc",
 	}
@@ -552,6 +552,7 @@ func genEnum(g *protogen.GeneratedFile, enum *enum) error {
 	for _, imp := range enumImports {
 		g.QualifiedGoIdent(protogen.GoIdent{GoImportPath: imp})
 	}
+	// if enum.List is set, import strings
 	if enum.List {
 		g.QualifiedGoIdent(protogen.GoIdent{GoImportPath: "strings"})
 	}
