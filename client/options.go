@@ -113,3 +113,20 @@ func WithOutputEncoder(format string, maker iocodec.EncoderMaker) Option {
 		c.outEncoders = e
 	}
 }
+
+func WithHeaders(headers map[string]string) Option {
+	return func(c *Config) {
+		maps := []map[string]string{headers, c.Headers}
+		res := map[string]string{}
+		for _, m := range maps {
+			for k, v := range m {
+				// Check if (k,v) was added before:
+				if _, present := res[k]; present {
+					continue
+				}
+				res[k] = v
+			}
+		}
+		c.Headers = res
+	}
+}

@@ -64,6 +64,8 @@ var DefaultConfig = &Config{
 	FlagNamer:    naming.LowerKebab,
 	EnvVarNamer:  naming.UpperSnake,
 
+	Headers: make(map[string]string),
+
 	inDecoders: map[string]iocodec.DecoderMaker{
 		"json": iocodec.JSONDecoderMaker(),
 		"xml":  iocodec.XMLDecoderMaker(),
