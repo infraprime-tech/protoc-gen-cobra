@@ -8,6 +8,11 @@ service Bank {
     rpc Deposit (DepositRequest) returns (DepositReply);
 }
 
+service Customer {
+    rpc Withdraw (WithdrawRequest) returns (WithdrawReply);
+}
+
+
 message DepositRequest {
     string parent = 1;
     string tenant = 2;
@@ -43,4 +48,21 @@ message Cluster {
 
 message DepositReply {
     string id = 1;
+}
+
+message WithdrawRequest {
+    string parent = 1;
+    string tenant = 2;
+    string environment = 3;
+    float amount = 4;
+    Role role = 5;
+}
+
+message WithdrawReply {
+    string new_amount = 1;
+}
+
+enum Role {
+    CUSTOMER = 0;
+    BANK = 1;
 }

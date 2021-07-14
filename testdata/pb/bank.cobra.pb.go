@@ -9,8 +9,10 @@ import (
 	flag "github.com/infraprime-tech/protoc-gen-cobra/flag"
 	iocodec "github.com/infraprime-tech/protoc-gen-cobra/iocodec"
 	cobra "github.com/spf13/cobra"
+	pflag "github.com/spf13/pflag"
 	grpc "google.golang.org/grpc"
 	metadata "google.golang.org/grpc/metadata"
+	strconv "strconv"
 	time "time"
 )
 
@@ -52,7 +54,7 @@ func _BankDepositCommand(cfg *client.Config) *cobra.Command {
 				cli := NewBankClient(cc)
 				v := &DepositRequest{}
 
-				md := metadata.New(cfg.headers)
+				md := metadata.New(cfg.Headers)
 				ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 				defer cancel()
 				ctx = metadata.NewOutgoingContext(ctx, md)
@@ -79,4 +81,98 @@ func _BankDepositCommand(cfg *client.Config) *cobra.Command {
 	cmd.PersistentFlags().StringVar(&req.Environment, cfg.FlagNamer("Environment"), "", "")
 
 	return cmd
+}
+
+func CustomerClientCommand(options ...client.Option) *cobra.Command {
+	cfg := client.NewConfig(options...)
+	cmd := &cobra.Command{
+		Use:   cfg.CommandNamer("Customer"),
+		Short: "Customer service client",
+		Long:  "",
+	}
+	cfg.BindFlags(cmd.PersistentFlags())
+	cmd.AddCommand(
+		_CustomerWithdrawCommand(cfg),
+	)
+	return cmd
+}
+
+func _CustomerWithdrawCommand(cfg *client.Config) *cobra.Command {
+	req := &WithdrawRequest{}
+
+	cmd := &cobra.Command{
+		Use:   cfg.CommandNamer("Withdraw"),
+		Short: "Withdraw RPC client",
+		Long:  "",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if cfg.UseEnvVars {
+				if err := flag.SetFlagsFromEnv(cmd.Parent().PersistentFlags(), true, cfg.EnvVarNamer, cfg.EnvVarPrefix, "Customer"); err != nil {
+					return err
+				}
+				if err := flag.SetFlagsFromEnv(cmd.PersistentFlags(), false, cfg.EnvVarNamer, cfg.EnvVarPrefix, "Customer", "Withdraw"); err != nil {
+					return err
+				}
+			}
+			return client.RoundTrip(cmd.Context(), cfg, func(cc grpc.ClientConnInterface, in iocodec.Decoder, out iocodec.Encoder) error {
+				cli := NewCustomerClient(cc)
+				v := &WithdrawRequest{}
+
+				md := metadata.New(cfg.Headers)
+				ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+				defer cancel()
+				ctx = metadata.NewOutgoingContext(ctx, md)
+
+				if err := in(v); err != nil {
+					return err
+				}
+				proto.Merge(v, req)
+
+				res, err := cli.Withdraw(ctx, v)
+
+				if err != nil {
+					return err
+				}
+
+				return out(res)
+
+			})
+		},
+	}
+
+	cmd.PersistentFlags().StringVar(&req.Parent, cfg.FlagNamer("Parent"), "", "")
+	cmd.PersistentFlags().StringVar(&req.Tenant, cfg.FlagNamer("Tenant"), "", "")
+	cmd.PersistentFlags().StringVar(&req.Environment, cfg.FlagNamer("Environment"), "", "")
+	cmd.PersistentFlags().Float32Var(&req.Amount, cfg.FlagNamer("Amount"), 0, "")
+	_RoleVar(cmd.PersistentFlags(), &req.Role, cfg.FlagNamer("Role"), "")
+
+	return cmd
+}
+
+type _RoleValue Role
+
+func _RoleVar(fs *pflag.FlagSet, p *Role, name, usage string) {
+	fs.Var((*_RoleValue)(p), name, usage)
+}
+
+func (v *_RoleValue) Set(val string) error {
+	if e, err := parseRole(val); err != nil {
+		return err
+	} else {
+		*v = _RoleValue(e)
+		return nil
+	}
+}
+
+func (*_RoleValue) Type() string { return "Role" }
+
+func (v *_RoleValue) String() string { return (Role)(*v).String() }
+
+func parseRole(s string) (Role, error) {
+	if i, ok := Role_value[s]; ok {
+		return Role(i), nil
+	} else if i, err := strconv.ParseInt(s, 0, 32); err == nil {
+		return Role(i), nil
+	} else {
+		return 0, err
+	}
 }
