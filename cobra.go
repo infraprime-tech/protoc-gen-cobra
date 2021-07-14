@@ -333,7 +333,6 @@ func walkFields(g *protogen.GeneratedFile, message *protogen.Message, path []str
 
 func flagFormat(g *protogen.GeneratedFile, fld *protogen.Field, enums map[string]*enum) string {
 	k := normalizeKind(fld.Desc.Kind())
-
 	if bt, ok := basicTypes[k]; ok {
 		if fld.Desc.IsList() {
 			switch k {
@@ -367,7 +366,8 @@ func flagFormat(g *protogen.GeneratedFile, fld *protogen.Field, enums map[string
 			return fmt.Sprintf("_%sPointerVar(cmd.PersistentFlags(), %%s, %%s, %%q)", id)
 		} else {
 			e.Value = true
-			return fmt.Sprintf("_%sVar(cmd.PersistentFlags(), %%s, %%s, %%q)", id)
+			e.RngSuffix = r.Intn(10000)
+			return fmt.Sprintf("_%sVar_%d(cmd.PersistentFlags(), %%s, %%s, %%q)", id, e.RngSuffix)
 		}
 	case protoreflect.MessageKind:
 		if kt, ok := knownTypes[fld.Message.GoIdent]; ok {
@@ -586,7 +586,6 @@ func genEnum(g *protogen.GeneratedFile, enum *enum) error {
 	if enum.List {
 		g.QualifiedGoIdent(protogen.GoIdent{GoImportPath: "strings"})
 	}
-	enum.RngSuffix = r.Intn(10000)
 	return enumTemplate.Execute(g, enum)
 }
 
