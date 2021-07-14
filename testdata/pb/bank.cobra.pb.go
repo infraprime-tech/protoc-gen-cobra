@@ -84,6 +84,22 @@ func _BankDepositCommand(cfg *client.Config) *cobra.Command {
 	return cmd
 }
 
+/*
+WARNING: A suffix is added to each of the generated entities below
+
+this bit of code generates a flag parser for a supplied enum field in a message which in turn belongs to a service.
+
+However, when messages across 2 or more services use the same enum as a message field, this code will get generated as many times as it exists in messages, and
+as a result, during compiling the compiler will throw the following error
+
+_StateValue redeclared in this block
+previous declaration at <filename>.cobra.go
+and more such errors will follow
+
+to avoid this, while keeping the same level of consistency, we opt to use deterministic suffixes for every invocation of this generation
+
+*/
+
 type _RoleValue Role
 
 func _RoleVar(fs *pflag.FlagSet, p *Role, name, usage string) {
@@ -178,26 +194,42 @@ func _CustomerWithdrawCommand(cfg *client.Config) *cobra.Command {
 	return cmd
 }
 
-type _RoleValue Role
+/*
+WARNING: A suffix is added to each of the generated entities below
 
-func _RoleVar(fs *pflag.FlagSet, p *Role, name, usage string) {
-	fs.Var((*_RoleValue)(p), name, usage)
+this bit of code generates a flag parser for a supplied enum field in a message which in turn belongs to a service.
+
+However, when messages across 2 or more services use the same enum as a message field, this code will get generated as many times as it exists in messages, and
+as a result, during compiling the compiler will throw the following error
+
+_StateValue redeclared in this block
+previous declaration at <filename>.cobra.go
+and more such errors will follow
+
+to avoid this, while keeping the same level of consistency, we opt to use deterministic suffixes for every invocation of this generation
+
+*/
+
+type _RoleValue_7263 Role
+
+func _RoleVar_7263(fs *pflag.FlagSet, p *Role, name, usage string) {
+	fs.Var((*_RoleValue_7263)(p), name, usage)
 }
 
-func (v *_RoleValue) Set(val string) error {
-	if e, err := parseRole(val); err != nil {
+func (v *_RoleValue_7263) Set(val string) error {
+	if e, err := parseRole_7263(val); err != nil {
 		return err
 	} else {
-		*v = _RoleValue(e)
+		*v = _RoleValue_7263(e)
 		return nil
 	}
 }
 
-func (*_RoleValue) Type() string { return "Role" }
+func (*_RoleValue_7263) Type() string { return "Role" }
 
-func (v *_RoleValue) String() string { return (Role)(*v).String() }
+func (v *_RoleValue_7263) String() string { return (Role)(*v).String() }
 
-func parseRole(s string) (Role, error) {
+func parseRole_7263(s string) (Role, error) {
 	if i, ok := Role_value[s]; ok {
 		return Role(i), nil
 	} else if i, err := strconv.ParseInt(s, 0, 32); err == nil {
