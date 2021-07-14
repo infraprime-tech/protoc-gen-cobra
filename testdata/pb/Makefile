@@ -2,5 +2,5 @@
 
 generate:
 	protoc --go_out=. \
-		-I . \
-        bank.proto
+	-I ./ \
+	bank.proto
