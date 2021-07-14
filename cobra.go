@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"sort"
 	"strings"
 	"text/template"
@@ -244,6 +245,7 @@ var (
 		wrappersPkg.Ident("StringValue"): {"string", "ParseStringWrapper", "StringWrapperVar", "StringWrapperSliceVar"},
 		wrappersPkg.Ident("BytesValue"):  {"bytesBase64", "ParseBytesBase64Wrapper", "BytesBase64WrapperVar", "BytesBase64WrapperSliceVar"},
 	}
+	r = rand.New(rand.NewSource(99))
 )
 
 func walkFields(g *protogen.GeneratedFile, message *protogen.Message, path []string, enums map[string]*enum, deprecated bool, visited map[protogen.GoIdent]bool, level int, postSetCode string) (string, string) {
@@ -331,7 +333,6 @@ func walkFields(g *protogen.GeneratedFile, message *protogen.Message, path []str
 
 func flagFormat(g *protogen.GeneratedFile, fld *protogen.Field, enums map[string]*enum) string {
 	k := normalizeKind(fld.Desc.Kind())
-
 	if bt, ok := basicTypes[k]; ok {
 		if fld.Desc.IsList() {
 			switch k {
@@ -365,7 +366,8 @@ func flagFormat(g *protogen.GeneratedFile, fld *protogen.Field, enums map[string
 			return fmt.Sprintf("_%sPointerVar(cmd.PersistentFlags(), %%s, %%s, %%q)", id)
 		} else {
 			e.Value = true
-			return fmt.Sprintf("_%sVar(cmd.PersistentFlags(), %%s, %%s, %%q)", id)
+			e.RngSuffix = r.Intn(10000)
+			return fmt.Sprintf("_%sVar_%d(cmd.PersistentFlags(), %%s, %%s, %%q)", id, e.RngSuffix)
 		}
 	case protoreflect.MessageKind:
 		if kt, ok := knownTypes[fld.Message.GoIdent]; ok {
@@ -464,29 +466,47 @@ type enum struct {
 	Pointer bool
 	List    bool
 	Map     bool
+	RngSuffix int
 }
 
 var (
 	enumTemplateCode = `
 {{if .Value}}
-type _{{.GoIdent.GoName}}Value {{.GoIdent.GoName}}
 
-func _{{.GoIdent.GoName}}Var(fs *pflag.FlagSet, p *{{.GoIdent.GoName}}, name, usage string) {
-	fs.Var((*_{{.GoIdent.GoName}}Value)(p), name, usage)
+/* 
+WARNING: A suffix is added to each of the generated entities below
+
+this bit of code generates a flag parser for a supplied enum field in a message which in turn belongs to a service.
+
+However, when messages across 2 or more services use the same enum as a message field, this code will get generated as many times as it exists in messages, and 
+as a result, during compiling the compiler will throw the following error
+
+_StateValue redeclared in this block
+previous declaration at <filename>.cobra.go
+and more such errors will follow
+
+to avoid this, while keeping the same level of consistency, we opt to use deterministic suffixes for every invocation of this generation
+
+*/
+
+type _{{.GoIdent.GoName}}Value_{{.RngSuffix}} {{.GoIdent.GoName}}
+
+func _{{.GoIdent.GoName}}Var_{{.RngSuffix}}(fs *pflag.FlagSet, p *{{.GoIdent.GoName}}, name, usage string) {
+	fs.Var((*_{{.GoIdent.GoName}}Value_{{.RngSuffix}})(p), name, usage)
 }
 
-func (v *_{{.GoIdent.GoName}}Value) Set(val string) error {
-	if e, err := parse{{.GoIdent.GoName}}(val); err != nil {
+func (v *_{{.GoIdent.GoName}}Value_{{.RngSuffix}}) Set(val string) error {
+	if e, err := parse{{.GoIdent.GoName}}_{{.RngSuffix}}(val); err != nil {
 		return err
 	} else {
-		*v = _{{.GoIdent.GoName}}Value(e)
+		*v = _{{.GoIdent.GoName}}Value_{{.RngSuffix}}(e)
 		return nil
 	}
 }
 
-func (*_{{.GoIdent.GoName}}Value) Type() string { return "{{.GoIdent.GoName}}" }
+func (*_{{.GoIdent.GoName}}Value_{{.RngSuffix}}) Type() string { return "{{.GoIdent.GoName}}" }
 
-func (v *_{{.GoIdent.GoName}}Value) String() string { return ({{.GoIdent.GoName}})(*v).String() }
+func (v *_{{.GoIdent.GoName}}Value_{{.RngSuffix}}) String() string { return ({{.GoIdent.GoName}})(*v).String() }
 {{end}}
 {{if .Pointer }}
 func _{{.GoIdent.GoName}}PointerVar(fs *pflag.FlagSet, p **{{.GoIdent.GoName}}, name, usage string) {
@@ -540,7 +560,7 @@ func _{{.GoIdent.GoName}}Parse(val string) (interface{}, error) {
 }
 {{end}}
 
-func parse{{.GoIdent.GoName}}(s string) ({{.GoIdent.GoName}}, error) {
+func parse{{.GoIdent.GoName}}_{{.RngSuffix}}(s string) ({{.GoIdent.GoName}}, error) {
 	if i, ok := {{.GoIdent.GoName}}_value[s]; ok {
 		return {{.GoIdent.GoName}}(i), nil
 	} else if i, err := strconv.ParseInt(s, 0, 32); err == nil {
@@ -555,6 +575,7 @@ func parse{{.GoIdent.GoName}}(s string) ({{.GoIdent.GoName}}, error) {
 		"strconv",
 		"github.com/spf13/pflag",
 	}
+
 )
 
 func genEnum(g *protogen.GeneratedFile, enum *enum) error {

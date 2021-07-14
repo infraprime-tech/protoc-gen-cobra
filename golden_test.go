@@ -3,7 +3,9 @@ package main
 import (
 	"bytes"
 	"flag"
+	"github.com/sirupsen/logrus"
 	"io/ioutil"
+	"math/rand"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -122,4 +124,13 @@ func protoc(t *testing.T, args []string) {
 	if err != nil {
 		t.Fatalf("protoc: %v", err)
 	}
+}
+
+func TestRandom(t *testing.T) {
+	r := rand.New(rand.NewSource(99))
+	logrus.Info(r.Intn(10000))
+
+	r2 := rand.New(rand.NewSource(99))
+	logrus.Info(r2.Intn(10000))
+
 }

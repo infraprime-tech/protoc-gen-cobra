@@ -2,11 +2,16 @@ syntax = "proto3";
 
 package pb;
 
-option go_package = ".;pb";
+option go_package = "./;pb";
 
 service Bank {
     rpc Deposit (DepositRequest) returns (DepositReply);
 }
+
+service Customer {
+    rpc Withdraw (WithdrawRequest) returns (WithdrawReply);
+}
+
 
 message DepositRequest {
     string parent = 1;
@@ -15,6 +20,8 @@ message DepositRequest {
 
     repeated ClusterWithNamespaces clusters = 4;
     ClusterWithNamespaces cluster_with_namespaces = 5;
+
+    Role role = 6;
 
     message ClusterWithNamespaces {
         Cluster cluster = 1;
@@ -43,4 +50,21 @@ message Cluster {
 
 message DepositReply {
     string id = 1;
+}
+
+message WithdrawRequest {
+    string parent = 1;
+    string tenant = 2;
+    string environment = 3;
+    float amount = 4;
+    Role role = 5;
+}
+
+message WithdrawReply {
+    string new_amount = 1;
+}
+
+enum Role {
+    CUSTOMER = 0;
+    BANK = 1;
 }
