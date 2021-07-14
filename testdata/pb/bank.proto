@@ -21,6 +21,8 @@ message DepositRequest {
     repeated ClusterWithNamespaces clusters = 4;
     ClusterWithNamespaces cluster_with_namespaces = 5;
 
+    Role role = 6;
+
     message ClusterWithNamespaces {
         Cluster cluster = 1;
         repeated NamespaceWithDeployments namespaces = 2;

@@ -79,8 +79,38 @@ func _BankDepositCommand(cfg *client.Config) *cobra.Command {
 	cmd.PersistentFlags().StringVar(&req.Parent, cfg.FlagNamer("Parent"), "", "")
 	cmd.PersistentFlags().StringVar(&req.Tenant, cfg.FlagNamer("Tenant"), "", "")
 	cmd.PersistentFlags().StringVar(&req.Environment, cfg.FlagNamer("Environment"), "", "")
+	_RoleVar(cmd.PersistentFlags(), &req.Role, cfg.FlagNamer("Role"), "")
 
 	return cmd
+}
+
+type _RoleValue Role
+
+func _RoleVar(fs *pflag.FlagSet, p *Role, name, usage string) {
+	fs.Var((*_RoleValue)(p), name, usage)
+}
+
+func (v *_RoleValue) Set(val string) error {
+	if e, err := parseRole(val); err != nil {
+		return err
+	} else {
+		*v = _RoleValue(e)
+		return nil
+	}
+}
+
+func (*_RoleValue) Type() string { return "Role" }
+
+func (v *_RoleValue) String() string { return (Role)(*v).String() }
+
+func parseRole(s string) (Role, error) {
+	if i, ok := Role_value[s]; ok {
+		return Role(i), nil
+	} else if i, err := strconv.ParseInt(s, 0, 32); err == nil {
+		return Role(i), nil
+	} else {
+		return 0, err
+	}
 }
 
 func CustomerClientCommand(options ...client.Option) *cobra.Command {
