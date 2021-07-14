@@ -1,6 +1,4 @@
-# --go-grpc_out=pb --go-grpc_opt=paths=source_relative \
-
 generate:
-	protoc --go_out=. \
+	protoc --go_out=. --go-grpc_out=. \
 	-I ./ \
 	bank.proto
